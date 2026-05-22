@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #080E14;
+  --bg-navy: #0D1B2A;
+  --bg-card: #112236;
+  --teal: #00B4D8;
+  --teal-hover: #0096C7;
+  --border: #1e3a52;
+  --muted: #8BAABB;
+  --foreground: #e8f0f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--foreground);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+}
+
+@layer utilities {
+  .font-syne {
+    font-family: 'Syne', sans-serif;
+  }
+  .font-dm {
+    font-family: 'DM Sans', sans-serif;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-base { background-color: var(--bg-base); }
+  .bg-navy { background-color: var(--bg-navy); }
+  .bg-card { background-color: var(--bg-card); }
+  .text-teal { color: var(--teal); }
+  .text-muted { color: var(--muted); }
+  .border-brand { border-color: var(--border); }
+  .transition-smooth {
+    transition: all 0.2s ease-in-out;
+  }
+}
