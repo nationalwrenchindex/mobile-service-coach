@@ -42,10 +42,13 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left transition-all duration-200"
+        className="w-full flex items-center justify-between px-4 py-4 text-left transition-all duration-200"
         style={{ backgroundColor: open ? "#112236" : "transparent" }}
       >
-        <span className="font-semibold text-sm pr-4 break-words min-w-0" style={{ fontFamily: "Syne, sans-serif" }}>
+        <span
+          className="font-semibold text-sm pr-3 break-words min-w-0 flex-1"
+          style={{ fontFamily: "Syne, sans-serif" }}
+        >
           {title}
         </span>
         <span style={{ color: "#00B4D8", fontSize: "18px", flexShrink: 0 }}>
@@ -53,17 +56,17 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
         </span>
       </button>
       {open && (
-        <div className="px-5 pb-5">
+        <div className="px-4 pb-5">
           <ol className="space-y-3 mt-2">
             {steps.map((s, i) => (
-              <li key={i} className="flex gap-3 text-sm break-words" style={{ color: "#8BAABB" }}>
+              <li key={i} className="flex gap-3 text-sm" style={{ color: "#8BAABB" }}>
                 <span
                   className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{ backgroundColor: "#112236", color: "#00B4D8" }}
                 >
                   {i + 1}
                 </span>
-                {s}
+                <span className="break-words min-w-0">{s}</span>
               </li>
             ))}
           </ol>
@@ -126,7 +129,7 @@ export default function ResultsPage() {
   if (loading) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center gap-6"
+        className="min-h-screen flex flex-col items-center justify-center gap-6 px-4"
         style={{ backgroundColor: "#080E14" }}
       >
         <div
@@ -134,12 +137,12 @@ export default function ResultsPage() {
           style={{ borderColor: "#1e3a52", borderTopColor: "#00B4D8" }}
         />
         <p
-          className="text-lg font-semibold"
+          className="text-lg font-semibold text-center"
           style={{ fontFamily: "Syne, sans-serif", color: "#8BAABB" }}
         >
           Analyzing your business...
         </p>
-        <p className="text-sm" style={{ color: "#1e3a52" }}>
+        <p className="text-sm text-center" style={{ color: "#1e3a52" }}>
           Generating specific dollar amounts for every insight
         </p>
       </div>
@@ -152,7 +155,7 @@ export default function ResultsPage() {
         className="min-h-screen flex flex-col items-center justify-center gap-6 px-4"
         style={{ backgroundColor: "#080E14" }}
       >
-        <p className="text-lg text-center" style={{ color: "#f87171" }}>
+        <p className="text-lg text-center break-words" style={{ color: "#f87171" }}>
           {error || "Something went wrong."}
         </p>
         <Link
@@ -171,32 +174,32 @@ export default function ResultsPage() {
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#080E14" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#080E14" }}>
       {/* Header */}
       <div
         className="px-4 py-4 flex items-center justify-between sticky top-0 z-10"
         style={{ backgroundColor: "#080E14", borderBottom: "1px solid #1e3a52" }}
       >
         <span
-          className="text-base font-bold"
+          className="text-base font-bold min-w-0 break-words"
           style={{ fontFamily: "Syne, sans-serif", color: "#00B4D8" }}
         >
           Mobile Service Coach
         </span>
         <Link
           href="/analyze/tier1"
-          className="text-sm"
+          className="text-sm flex-shrink-0 ml-4"
           style={{ color: "#8BAABB" }}
         >
           Start Over
         </Link>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Score circle */}
         <div className="text-center">
           <h1
-            className="text-2xl sm:text-3xl font-extrabold mb-6"
+            className="text-2xl sm:text-3xl font-extrabold mb-6 break-words"
             style={{ fontFamily: "Syne, sans-serif" }}
           >
             Your Business Health Report
@@ -239,7 +242,7 @@ export default function ResultsPage() {
 
         {/* Subscores */}
         <div
-          className="rounded-2xl p-6 overflow-hidden w-full"
+          className="rounded-2xl p-5 sm:p-6 overflow-hidden w-full"
           style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
         >
           <h2
@@ -251,11 +254,11 @@ export default function ResultsPage() {
           <div className="space-y-4">
             {Object.entries(result.subscores).map(([key, val]) => (
               <div key={key}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span style={{ color: "#8BAABB" }}>
+                <div className="flex justify-between items-center gap-2 text-sm mb-1">
+                  <span className="break-words min-w-0" style={{ color: "#8BAABB" }}>
                     {SUBSCORE_LABELS[key] || key}
                   </span>
-                  <span className="font-semibold" style={{ color: ScoreColor(val) }}>
+                  <span className="font-semibold flex-shrink-0" style={{ color: ScoreColor(val) }}>
                     {val}
                   </span>
                 </div>
@@ -282,27 +285,30 @@ export default function ResultsPage() {
             {result.topActions.map((a, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5 overflow-hidden w-full"
+                className="rounded-xl p-4 sm:p-5 overflow-hidden w-full"
                 style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span
-                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                      style={{ backgroundColor: "#00B4D8", color: "#080E14" }}
+                <div className="flex items-start gap-3 mb-2">
+                  <span
+                    className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ backgroundColor: "#00B4D8", color: "#080E14" }}
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="font-semibold text-sm break-words mb-1"
+                      style={{ fontFamily: "Syne, sans-serif" }}
                     >
-                      {i + 1}
-                    </span>
-                    <p className="font-semibold text-sm break-words min-w-0" style={{ fontFamily: "Syne, sans-serif" }}>
                       {a.title}
                     </p>
+                    <span
+                      className="text-sm font-bold break-words"
+                      style={{ color: "#00B4D8", fontFamily: "Syne, sans-serif" }}
+                    >
+                      {a.dollarImpact}
+                    </span>
                   </div>
-                  <span
-                    className="text-sm font-bold flex-shrink-0 break-words"
-                    style={{ color: "#00B4D8", fontFamily: "Syne, sans-serif" }}
-                  >
-                    {a.dollarImpact}
-                  </span>
                 </div>
                 <p className="text-sm ml-9 break-words" style={{ color: "#8BAABB" }}>
                   {a.description}
@@ -334,7 +340,7 @@ export default function ResultsPage() {
 
         {/* Email capture */}
         <div
-          className="rounded-2xl p-6 overflow-hidden w-full"
+          className="rounded-2xl p-5 sm:p-6 overflow-hidden w-full"
           style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
         >
           <h2
@@ -360,7 +366,7 @@ export default function ResultsPage() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-xl text-sm"
+                className="w-full sm:flex-1 px-4 py-3 rounded-xl text-base"
                 style={{
                   backgroundColor: "#112236",
                   border: "1px solid #1e3a52",
@@ -372,7 +378,7 @@ export default function ResultsPage() {
               <button
                 onClick={sendReport}
                 disabled={sending || !email}
-                className="px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 whitespace-nowrap"
+                className="w-full sm:w-auto px-6 py-4 rounded-xl font-semibold text-sm transition-all duration-200 min-h-[48px]"
                 style={{
                   backgroundColor: email ? "#00B4D8" : "#1e3a52",
                   color: email ? "#080E14" : "#8BAABB",
@@ -388,11 +394,11 @@ export default function ResultsPage() {
 
         {/* CTA */}
         <div
-          className="rounded-2xl p-8 text-center overflow-hidden w-full"
+          className="rounded-2xl p-6 sm:p-8 text-center overflow-hidden w-full"
           style={{ backgroundColor: "#112236", border: "1px solid #1e3a52" }}
         >
           <h2
-            className="text-xl sm:text-2xl font-extrabold mb-3"
+            className="text-xl sm:text-2xl font-extrabold mb-3 break-words"
             style={{ fontFamily: "Syne, sans-serif" }}
           >
             Ready to automate everything we just identified?
@@ -405,7 +411,7 @@ export default function ResultsPage() {
             href="https://nationalwrenchindex.com/Suite"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-8 py-4 rounded-xl font-semibold transition-all duration-200"
+            className="flex items-center justify-center w-full sm:inline-flex sm:w-auto px-8 py-4 rounded-xl font-semibold transition-all duration-200 min-h-[48px]"
             style={{ backgroundColor: "#00B4D8", color: "#080E14", fontFamily: "DM Sans, sans-serif" }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#0096C7")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#00B4D8")}
@@ -417,7 +423,7 @@ export default function ResultsPage() {
 
       {/* Footer */}
       <footer
-        className="px-4 py-8 text-center text-sm mt-8"
+        className="px-4 py-8 text-center text-sm mt-8 break-words"
         style={{ borderTop: "1px solid #1e3a52", color: "#8BAABB" }}
       >
         <p>© {new Date().getFullYear()} Mobile Service Coach. A National Wrench Index LLC product.</p>
