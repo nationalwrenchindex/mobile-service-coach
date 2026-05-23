@@ -2,6 +2,9 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 const SUBSCORES = [
   { label: "Financial Health", value: 78 },
@@ -50,13 +53,127 @@ const VERTICALS = [
   },
 ];
 
+type FileStatus = "idle" | "processing" | "done" | "error";
+
+function findColKey(rows: Record<string, unknown>[], keywords: string[]): string | null {
+  if (!rows.length) return null;
+  for (const key of Object.keys(rows[0])) {
+    const lower = key.toLowerCase().trim();
+    if (keywords.some((kw) => lower.includes(kw))) return key;
+  }
+  return null;
+}
+
+function extractFields(rows: Record<string, unknown>[]) {
+  const revenueKey = findColKey(rows, ["amount", "total", "revenue", "price", "charge", "payment", "net", "gross", "invoice"]);
+  const serviceKey = findColKey(rows, ["service", "description", "type", "item", "work", "category"]);
+  const dateKey = findColKey(rows, ["date", "created"]);
+
+  let totalRevenue = 0;
+  const serviceCounts: Record<string, { count: number; total: number }> = {};
+  const dates: number[] = [];
+
+  for (const row of rows) {
+    if (revenueKey) {
+      const val = parseFloat(String(row[revenueKey] ?? "").replace(/[$,\s]/g, ""));
+      if (!isNaN(val) && val > 0) totalRevenue += val;
+    }
+    if (serviceKey && row[serviceKey]) {
+      const svc = String(row[serviceKey]).trim();
+      if (svc) {
+        if (!serviceCounts[svc]) serviceCounts[svc] = { count: 0, total: 0 };
+        serviceCounts[svc].count++;
+        if (revenueKey) {
+          const val = parseFloat(String(row[revenueKey] ?? "").replace(/[$,\s]/g, ""));
+          if (!isNaN(val) && val > 0) serviceCounts[svc].total += val;
+        }
+      }
+    }
+    if (dateKey && row[dateKey]) {
+      const d = new Date(String(row[dateKey]));
+      if (!isNaN(d.getTime())) dates.push(d.getTime());
+    }
+  }
+
+  let monthlyRevenue = totalRevenue;
+  let jobsPerMonth = rows.length;
+
+  if (dates.length > 1) {
+    const minMs = Math.min(...dates);
+    const maxMs = Math.max(...dates);
+    const monthSpan = Math.max(1, Math.round((maxMs - minMs) / (1000 * 60 * 60 * 24 * 30.5)));
+    if (monthSpan > 1) {
+      monthlyRevenue = totalRevenue / monthSpan;
+      jobsPerMonth = rows.length / monthSpan;
+    }
+  }
+
+  let topService = "";
+  let servicePrice = "";
+  const sorted = Object.entries(serviceCounts).sort((a, b) => b[1].count - a[1].count);
+  if (sorted.length > 0) {
+    topService = sorted[0][0];
+    const { count, total } = sorted[0][1];
+    if (count > 0 && total > 0) servicePrice = String(Math.round(total / count));
+  }
+
+  return {
+    monthlyRevenue: monthlyRevenue > 0 ? String(Math.round(monthlyRevenue)) : "",
+    jobsPerMonth: jobsPerMonth > 0 ? String(Math.round(jobsPerMonth)) : "",
+    topService,
+    servicePrice,
+  };
+}
+
 export default function Home() {
+  const router = useRouter();
   const [dragOver, setDragOver] = useState(false);
+  const [fileStatus, setFileStatus] = useState<FileStatus>("idle");
+  const [fileName, setFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  async function processFile(file: File) {
+    setFileName(file.name);
+    setFileStatus("processing");
+    try {
+      let rows: Record<string, unknown>[] = [];
+      if (file.name.toLowerCase().endsWith(".csv")) {
+        rows = await new Promise((resolve, reject) => {
+          Papa.parse<Record<string, unknown>>(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (result) => resolve(result.data),
+            error: (err) => reject(err),
+          });
+        });
+      } else {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(new Uint8Array(buffer), { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+      }
+      if (!rows.length) throw new Error("No data rows found");
+      const extracted = extractFields(rows);
+      localStorage.setItem("tier1_prefill", JSON.stringify({ parseError: false, fileName: file.name, data: extracted }));
+      setFileStatus("done");
+      setTimeout(() => router.push("/analyze/tier1"), 800);
+    } catch {
+      localStorage.setItem("tier1_prefill", JSON.stringify({ parseError: true, fileName: file.name }));
+      setFileStatus("error");
+      setTimeout(() => router.push("/analyze/tier1"), 1200);
+    }
+  }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   }
 
   return (
@@ -394,22 +511,45 @@ export default function Home() {
           Upload a CSV or XLSX from your invoicing software to pre-fill your analysis.
         </p>
         <div
-          className={`rounded-2xl p-10 text-center cursor-pointer transition-all duration-200 ${dragOver ? "opacity-100" : "opacity-90"}`}
+          className={`rounded-2xl p-10 text-center transition-all duration-200 ${fileStatus === "idle" ? "cursor-pointer" : "cursor-default"} ${dragOver ? "opacity-100" : "opacity-90"}`}
           style={{
-            border: `2px dashed ${dragOver ? "#00B4D8" : "#1e3a52"}`,
-            backgroundColor: dragOver ? "#112236" : "#0D1B2A",
+            border: `2px dashed ${dragOver ? "#00B4D8" : fileStatus === "done" ? "#00B4D8" : fileStatus === "error" ? "#f87171" : "#1e3a52"}`,
+            backgroundColor: dragOver ? "#112236" : fileStatus !== "idle" ? "#112236" : "#0D1B2A",
           }}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={(e) => { if (fileStatus === "idle") { e.preventDefault(); setDragOver(true); } }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          onClick={() => fileRef.current?.click()}
+          onDrop={fileStatus === "idle" ? handleDrop : undefined}
+          onClick={() => fileStatus === "idle" && fileRef.current?.click()}
         >
-          <div className="text-4xl mb-4">📁</div>
-          <p className="font-medium mb-2">Drop your CSV or XLSX here</p>
-          <p className="text-sm" style={{ color: "#8BAABB" }}>
-            or click to browse
-          </p>
-          <input ref={fileRef} type="file" accept=".csv,.xlsx" className="hidden" />
+          {fileStatus === "idle" && (
+            <>
+              <div className="text-4xl mb-4">📁</div>
+              <p className="font-medium mb-2">Drop your CSV or XLSX here</p>
+              <p className="text-sm" style={{ color: "#8BAABB" }}>or click to browse</p>
+            </>
+          )}
+          {fileStatus === "processing" && (
+            <>
+              <div className="text-4xl mb-4 animate-spin inline-block">⏳</div>
+              <p className="font-medium mb-1" style={{ color: "#e8f0f5" }}>{fileName}</p>
+              <p className="text-sm" style={{ color: "#8BAABB" }}>Extracting your data...</p>
+            </>
+          )}
+          {fileStatus === "done" && (
+            <>
+              <div className="text-4xl mb-4" style={{ color: "#00B4D8" }}>✓</div>
+              <p className="font-medium mb-1" style={{ color: "#e8f0f5" }}>{fileName}</p>
+              <p className="text-sm" style={{ color: "#00B4D8" }}>Data loaded — redirecting to your analysis...</p>
+            </>
+          )}
+          {fileStatus === "error" && (
+            <>
+              <div className="text-4xl mb-4">⚠️</div>
+              <p className="font-medium mb-1" style={{ color: "#e8f0f5" }}>{fileName}</p>
+              <p className="text-sm" style={{ color: "#8BAABB" }}>Could not auto-fill — redirecting so you can enter numbers manually.</p>
+            </>
+          )}
+          <input ref={fileRef} type="file" accept=".csv,.xlsx" className="hidden" onChange={handleFileChange} />
         </div>
         <div className="text-center mt-6">
           <span className="text-sm" style={{ color: "#8BAABB" }}>

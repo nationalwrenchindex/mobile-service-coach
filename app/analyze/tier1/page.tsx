@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const TRADES = [
@@ -35,6 +35,24 @@ export default function Tier1Page() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Tier1Data>(INITIAL);
+  const [prefillBanner, setPrefillBanner] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("tier1_prefill");
+    if (!raw) return;
+    localStorage.removeItem("tier1_prefill");
+    try {
+      const prefill = JSON.parse(raw);
+      if (prefill.parseError) {
+        setPrefillBanner({ type: "error", message: `We couldn't auto-fill from "${prefill.fileName}" — please enter your numbers manually.` });
+      } else if (prefill.data) {
+        setData((prev) => ({ ...prev, ...prefill.data }));
+        setPrefillBanner({ type: "success", message: `Pre-filled from "${prefill.fileName}" — review and adjust if needed.` });
+      }
+    } catch {
+      // ignore malformed data
+    }
+  }, []);
 
   const TOTAL_STEPS = 8;
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
@@ -108,6 +126,28 @@ export default function Tier1Page() {
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-10 max-w-xl mx-auto w-full">
         <div className="w-full">
+          {/* Prefill banner */}
+          {prefillBanner && (
+            <div
+              className="rounded-xl px-4 py-3 mb-6 text-sm flex items-start gap-2"
+              style={{
+                backgroundColor: prefillBanner.type === "success" ? "#0a2a1a" : "#2a1010",
+                border: `1px solid ${prefillBanner.type === "success" ? "#00B4D8" : "#f87171"}`,
+                color: prefillBanner.type === "success" ? "#00B4D8" : "#f87171",
+              }}
+            >
+              <span className="flex-shrink-0">{prefillBanner.type === "success" ? "✓" : "⚠"}</span>
+              <span>{prefillBanner.message}</span>
+              <button
+                onClick={() => setPrefillBanner(null)}
+                className="ml-auto flex-shrink-0 opacity-60 hover:opacity-100"
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           {/* Tier badge */}
           <div className="mb-6">
             <span
