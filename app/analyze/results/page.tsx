@@ -3,6 +3,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+// ---------------------------------------------------------------------------
+// Affiliate URLs — swap values via environment variables, no code changes needed
+// ---------------------------------------------------------------------------
+const AFFILIATE_NEXT_INSURANCE =
+  process.env.NEXT_PUBLIC_AFFILIATE_NEXT_INSURANCE ?? "https://nextinsurance.com";
+const AFFILIATE_THIMBLE =
+  process.env.NEXT_PUBLIC_AFFILIATE_THIMBLE ?? "https://thimble.com";
+const AFFILIATE_ZENBUSINESS =
+  process.env.NEXT_PUBLIC_AFFILIATE_ZENBUSINESS ?? "https://zenbusiness.com";
+const AFFILIATE_RELAY =
+  process.env.NEXT_PUBLIC_AFFILIATE_RELAY ?? "https://relayfi.com";
+
+const NWI_SUITE_URL =
+  "https://nationalwrenchindex.com/Suite?utm_source=mobileservicecoach&utm_medium=coaching_report&utm_campaign=results_page";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 type Action = { title: string; description: string; dollarImpact: string };
 type GuidanceItem = { title: string; steps: string[] };
 
@@ -19,6 +37,11 @@ type AnalysisResult = {
   infrastructureGuidance: Record<string, GuidanceItem>;
 };
 
+type AffiliateCta = {
+  links: { url: string; label: string }[];
+  isOwned?: boolean;
+};
+
 const SUBSCORE_LABELS: Record<string, string> = {
   financialHealth: "Financial Health",
   pricing: "Pricing vs Market",
@@ -27,14 +50,58 @@ const SUBSCORE_LABELS: Record<string, string> = {
   revenueEfficiency: "Revenue Efficiency",
 };
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 function ScoreColor(val: number) {
   if (val < 50) return "#f87171";
   if (val < 70) return "#fbbf24";
   return "#00B4D8";
 }
 
-function CollapsibleGuidance({ title, steps }: GuidanceItem) {
+function getAffiliateCta(key: string): AffiliateCta | null {
+  switch (key) {
+    case "insurance":
+      return {
+        links: [
+          { url: AFFILIATE_NEXT_INSURANCE, label: "Get a quote from Next Insurance" },
+          { url: AFFILIATE_THIMBLE, label: "Get a quote from Thimble" },
+        ],
+      };
+    case "llc":
+      return {
+        links: [{ url: AFFILIATE_ZENBUSINESS, label: "Form your LLC with ZenBusiness" }],
+      };
+    case "businessBank":
+      return {
+        links: [{ url: AFFILIATE_RELAY, label: "Open a free business account with Relay" }],
+      };
+    case "mileage":
+      return {
+        isOwned: true,
+        links: [
+          {
+            url: NWI_SUITE_URL,
+            label: "Track mileage automatically with NWI Suite Labor Watch",
+          },
+        ],
+      };
+    default:
+      return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Collapsible guidance card
+// ---------------------------------------------------------------------------
+function CollapsibleGuidance({
+  title,
+  steps,
+  guidanceKey,
+}: GuidanceItem & { guidanceKey: string }) {
   const [open, setOpen] = useState(false);
+  const affiliateCta = getAffiliateCta(guidanceKey);
+
   return (
     <div
       className="rounded-xl overflow-hidden w-full"
@@ -55,6 +122,7 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
           {open ? "−" : "+"}
         </span>
       </button>
+
       {open && (
         <div className="px-4 pb-5">
           <ol className="space-y-3 mt-2">
@@ -70,12 +138,55 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
               </li>
             ))}
           </ol>
+
+          {/* Affiliate / partner CTA */}
+          {affiliateCta && (
+            <div
+              className="mt-4 rounded-lg p-3"
+              style={{ backgroundColor: "#112236", border: "1px solid #1e3a52" }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold" style={{ color: "#8BAABB" }}>
+                  {affiliateCta.isOwned ? "Recommended Tool" : "Partner Resources"}
+                </span>
+                {!affiliateCta.isOwned && (
+                  <span
+                    className="text-xs px-1.5 py-0.5 rounded font-medium"
+                    style={{ backgroundColor: "#1e3a52", color: "#8BAABB" }}
+                  >
+                    Sponsored
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {affiliateCta.links.map((link, i) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel={
+                      affiliateCta.isOwned
+                        ? "noopener noreferrer"
+                        : "noopener noreferrer sponsored"
+                    }
+                    className="text-sm font-medium break-words"
+                    style={{ color: "#00B4D8" }}
+                  >
+                    {link.label} →
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Results page
+// ---------------------------------------------------------------------------
 export default function ResultsPage() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -332,7 +443,12 @@ export default function ResultsPage() {
             </p>
             <div className="space-y-3">
               {Object.entries(result.infrastructureGuidance).map(([key, item]) => (
-                <CollapsibleGuidance key={key} title={item.title} steps={item.steps} />
+                <CollapsibleGuidance
+                  key={key}
+                  guidanceKey={key}
+                  title={item.title}
+                  steps={item.steps}
+                />
               ))}
             </div>
           </div>
@@ -408,7 +524,7 @@ export default function ResultsPage() {
             and tax prep — built specifically for mobile service pros.
           </p>
           <a
-            href="https://nationalwrenchindex.com/Suite"
+            href={NWI_SUITE_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-full sm:inline-flex sm:w-auto px-8 py-4 rounded-xl font-semibold transition-all duration-200 min-h-[48px]"

@@ -21,12 +21,23 @@ Generate a response as valid JSON only — no markdown, no code fences, no extra
     { "title": <string>, "description": <string>, "dollarImpact": <string> }
   ],
   "infrastructureGuidance": {
-    "<key for each No answer>": {
-      "title": <string>,
-      "steps": [<string>, ...]
-    }
+    "<key>": { "title": <string>, "steps": [<string>, ...] }
   }
-}`;
+}
+
+INFRASTRUCTURE GUIDANCE RULES:
+- Only include entries for "No" answers.
+- Use ONLY these exact key names (no others):
+    "googleProfile"     — missing Google Business Profile
+    "llc"               — not registered as an LLC or business entity
+    "insurance"         — lacking general liability insurance
+    "businessBank"      — lacking a separate business bank account
+    "mileage"           — not tracking business mileage
+    "quarterlyTaxes"    — not setting aside quarterly taxes
+    "serviceAgreement"  — lacking a written service agreement
+    "reviewCollection"  — lacking a review collection system
+- Do NOT mention specific third-party brand names in steps (no insurance companies, banks, LLC services, or mileage apps by name). Keep steps generic and action-focused — the platform surfaces partner resources separately.
+- For the "mileage" key: focus steps on the IRS standard mileage rate, the tax deduction dollar value based on the business data, and why consistent daily logging matters. Reference "NWI Suite Labor Watch" as the recommended tool for automated mileage tracking.`;
 
 function buildFallback() {
   return {
