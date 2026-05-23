@@ -250,6 +250,27 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TRUST BAR */}
+      <div
+        className="w-full py-4 px-4"
+        style={{ borderTop: "1px solid #1e3a52", borderBottom: "1px solid #1e3a52", backgroundColor: "#080E14" }}
+      >
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+          {[
+            { icon: "🔒", text: "Your data is never stored. We analyze it and forget it." },
+            { icon: "⚡", text: "Results in under 7 minutes" },
+            { icon: "🆓", text: "Always free. No credit card ever." },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-1.5">
+              <span className="text-sm">{item.icon}</span>
+              <span className="text-xs" style={{ color: "#8BAABB", fontFamily: "DM Sans, sans-serif" }}>
+                {item.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* SAMPLE SCORE PREVIEW */}
       <section className="px-4 sm:px-8 pb-20 max-w-3xl mx-auto">
         <p className="text-center text-sm mb-6" style={{ color: "#8BAABB" }}>
@@ -562,6 +583,54 @@ export default function Home() {
           >
             Answer questions manually instead
           </Link>
+        </div>
+      </section>
+
+      {/* FOUNDER TESTIMONIAL */}
+      <section className="px-4 sm:px-8 pb-20 max-w-3xl mx-auto">
+        <div
+          className="rounded-2xl p-6 sm:p-8"
+          style={{
+            backgroundColor: "#0D1B2A",
+            border: "1px solid #1e3a52",
+            borderLeft: "4px solid #00B4D8",
+          }}
+        >
+          <blockquote
+            className="text-sm sm:text-base leading-relaxed mb-6"
+            style={{ color: "#8BAABB", fontFamily: "DM Sans, sans-serif", fontStyle: "italic" }}
+          >
+            &ldquo;I built this tool because I needed it myself. I have been running a mobile
+            service business for years and thought I had things figured out. I ran my own business
+            through the assessment and scored a 42 out of 100. I was leaving significant money on
+            the table every month and had no idea how legally and financially vulnerable I was.
+            This tool gave me the wake-up call I needed — for free. I built it so every mobile
+            service professional could have the same moment of clarity I did.&rdquo;
+          </blockquote>
+          <div className="flex items-center gap-4">
+            <div
+              className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
+              style={{
+                backgroundColor: "#112236",
+                color: "#00B4D8",
+                border: "2px solid #00B4D8",
+                fontFamily: "Syne, sans-serif",
+              }}
+            >
+              BF
+            </div>
+            <div>
+              <p
+                className="font-semibold text-sm"
+                style={{ fontFamily: "Syne, sans-serif", color: "#e8f0f5" }}
+              >
+                Brock Fleeman
+              </p>
+              <p className="text-xs" style={{ color: "#8BAABB" }}>
+                Founder — Mobile Service Coach
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
