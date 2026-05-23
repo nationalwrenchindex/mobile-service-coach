@@ -37,7 +37,7 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
   const [open, setOpen] = useState(false);
   return (
     <div
-      className="rounded-xl overflow-hidden"
+      className="rounded-xl overflow-hidden w-full"
       style={{ border: "1px solid #1e3a52", backgroundColor: "#0D1B2A" }}
     >
       <button
@@ -45,7 +45,7 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
         className="w-full flex items-center justify-between px-5 py-4 text-left transition-all duration-200"
         style={{ backgroundColor: open ? "#112236" : "transparent" }}
       >
-        <span className="font-semibold text-sm pr-4" style={{ fontFamily: "Syne, sans-serif" }}>
+        <span className="font-semibold text-sm pr-4 break-words min-w-0" style={{ fontFamily: "Syne, sans-serif" }}>
           {title}
         </span>
         <span style={{ color: "#00B4D8", fontSize: "18px", flexShrink: 0 }}>
@@ -56,7 +56,7 @@ function CollapsibleGuidance({ title, steps }: GuidanceItem) {
         <div className="px-5 pb-5">
           <ol className="space-y-3 mt-2">
             {steps.map((s, i) => (
-              <li key={i} className="flex gap-3 text-sm" style={{ color: "#8BAABB" }}>
+              <li key={i} className="flex gap-3 text-sm break-words" style={{ color: "#8BAABB" }}>
                 <span
                   className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{ backgroundColor: "#112236", color: "#00B4D8" }}
@@ -239,7 +239,7 @@ export default function ResultsPage() {
 
         {/* Subscores */}
         <div
-          className="rounded-2xl p-6"
+          className="rounded-2xl p-6 overflow-hidden w-full"
           style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
         >
           <h2
@@ -282,29 +282,29 @@ export default function ResultsPage() {
             {result.topActions.map((a, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5"
+                className="rounded-xl p-5 overflow-hidden w-full"
                 style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
                     <span
                       className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                       style={{ backgroundColor: "#00B4D8", color: "#080E14" }}
                     >
                       {i + 1}
                     </span>
-                    <p className="font-semibold text-sm" style={{ fontFamily: "Syne, sans-serif" }}>
+                    <p className="font-semibold text-sm break-words min-w-0" style={{ fontFamily: "Syne, sans-serif" }}>
                       {a.title}
                     </p>
                   </div>
                   <span
-                    className="text-sm font-bold whitespace-nowrap flex-shrink-0"
+                    className="text-sm font-bold flex-shrink-0 break-words"
                     style={{ color: "#00B4D8", fontFamily: "Syne, sans-serif" }}
                   >
                     {a.dollarImpact}
                   </span>
                 </div>
-                <p className="text-sm ml-9" style={{ color: "#8BAABB" }}>
+                <p className="text-sm ml-9 break-words" style={{ color: "#8BAABB" }}>
                   {a.description}
                 </p>
               </div>
@@ -334,7 +334,7 @@ export default function ResultsPage() {
 
         {/* Email capture */}
         <div
-          className="rounded-2xl p-6"
+          className="rounded-2xl p-6 overflow-hidden w-full"
           style={{ backgroundColor: "#0D1B2A", border: "1px solid #1e3a52" }}
         >
           <h2
@@ -388,7 +388,7 @@ export default function ResultsPage() {
 
         {/* CTA */}
         <div
-          className="rounded-2xl p-8 text-center"
+          className="rounded-2xl p-8 text-center overflow-hidden w-full"
           style={{ backgroundColor: "#112236", border: "1px solid #1e3a52" }}
         >
           <h2
@@ -397,7 +397,7 @@ export default function ResultsPage() {
           >
             Ready to automate everything we just identified?
           </h2>
-          <p className="text-sm mb-6" style={{ color: "#8BAABB" }}>
+          <p className="text-sm mb-6 break-words" style={{ color: "#8BAABB" }}>
             The National Wrench Index Suite handles invoicing, review collection, mileage tracking,
             and tax prep — built specifically for mobile service pros.
           </p>
